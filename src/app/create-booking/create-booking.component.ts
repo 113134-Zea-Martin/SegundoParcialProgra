@@ -11,8 +11,9 @@ import {
   AsyncValidatorFn,
 } from '@angular/forms';
 import { ApiServiceService } from '../api-service.service';
-import { Service, Venue } from '../interfaces';
+import { Booking, Service, Venue } from '../interfaces';
 import { catchError, map, Observable, of } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-booking',
@@ -22,7 +23,7 @@ import { catchError, map, Observable, of } from 'rxjs';
   styleUrl: './create-booking.component.css',
 })
 export class CreateBookingComponent implements OnInit {
-  constructor(private api: ApiServiceService) {}
+  constructor(private api: ApiServiceService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadVenues();
@@ -172,8 +173,8 @@ export class CreateBookingComponent implements OnInit {
   createBooking() {
     this.createBookingCode();
     const booking = this.reservaForm.value;
-    const bookingCreated = {
-      bookingCode: this.bookingCode,
+    const bookingCreated: Booking = {
+      bookingCode: this.bookingCode.toString(),
       companyName: booking.companyName,
       companyEmail: booking.companyEmail,
       contactPhone: booking.contactPhone,
@@ -189,6 +190,10 @@ export class CreateBookingComponent implements OnInit {
     };
 
     console.log(bookingCreated);
+    this.api.createBooking(bookingCreated).subscribe((response) => {
+      console.log('Reserva creada:', response);
+      this.router.navigate(['/bookings']);
+    });
   }
 
   //Validacion de que la endTime sea mayor a la startTime

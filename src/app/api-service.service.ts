@@ -27,4 +27,8 @@ export class ApiServiceService {
     return this.http.get<Booking[]>(environment.apiBookings);
   }
 
+  createBooking(booking: Booking): Observable<Booking> {
+    return this.http.post<Booking>(environment.apiBookings, booking);
+  }
+
 }
