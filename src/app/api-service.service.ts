@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from './environment';
-import { Service, Venue } from './interfaces';
+import { Booking, Service, Venue } from './interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +21,10 @@ export class ApiServiceService {
   
   getAvailability(venueId: string, date: Date): Observable<boolean> {
     return this.http.get<boolean>(`${environment.apiAvailability}?venueId=${venueId}&date=${date}`);
+  }
+
+  getBookings(): Observable<Booking[]> {
+    return this.http.get<Booking[]>(environment.apiBookings);
   }
 
 }

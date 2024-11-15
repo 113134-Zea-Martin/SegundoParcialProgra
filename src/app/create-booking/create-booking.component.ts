@@ -46,11 +46,15 @@ export class CreateBookingComponent implements OnInit {
       ]),
       contactPhone: new FormControl('', Validators.required),
       venueId: new FormControl('', Validators.required),
-      eventDate: new FormControl('', Validators.required, this.checkAvailability()),
+      eventDate: new FormControl(
+        '',
+        Validators.required,
+        this.checkAvailability()
+      ),
       startTime: new FormControl('', [Validators.required]),
       endTime: new FormControl('', [Validators.required]),
       totalPeople: new FormControl(0, Validators.required),
-      services: new FormArray([],[ Validators.required]),
+      services: new FormArray([], [Validators.required]),
     },
     { validators: this.timeValidator }
   );
@@ -60,15 +64,17 @@ export class CreateBookingComponent implements OnInit {
   }
 
   addService() {
-    const serviceGroup = new FormGroup({
-      serviceId: new FormControl('', Validators.required),
-      quantity: new FormControl(0, Validators.required),
-      pricePerPerson: new FormControl(0, Validators.required),
-      startTime: new FormControl('', Validators.required),
-      endTime: new FormControl('', Validators.required),
-      subTotal: new FormControl(0),
-    }, { validators: this.validateServiceHours }
-  );
+    const serviceGroup = new FormGroup(
+      {
+        serviceId: new FormControl('', Validators.required),
+        quantity: new FormControl(0, Validators.required),
+        pricePerPerson: new FormControl(0, Validators.required),
+        startTime: new FormControl('', Validators.required),
+        endTime: new FormControl('', Validators.required),
+        subTotal: new FormControl(0),
+      },
+      { validators: this.validateServiceHours }
+    );
 
     serviceGroup.get('serviceId')?.valueChanges.subscribe(() => {
       this.calculateSubtotal(serviceGroup);
@@ -216,12 +222,12 @@ export class CreateBookingComponent implements OnInit {
 
       console.log('venueId', venueId);
       console.log('eventDate', eventDate);
-  
+
       // Si no hay valores, no se realiza la verificación
       if (!venueId || !eventDate) {
         return of(null);
       }
-  
+
       // Llamada a la API para verificar disponibilidad
       return this.api.getAvailability(venueId, eventDate).pipe(
         map((response) => {
@@ -231,7 +237,7 @@ export class CreateBookingComponent implements OnInit {
               (record: { venueId: any; date: any; available: boolean }) =>
                 record.venueId === venueId && record.date === eventDate
             );
-  
+
             // Devuelve `null` si está disponible, o `{ unavailable: true }` si no lo está
             return availabilityRecord?.available ? null : { unavailable: true };
           } else {
@@ -252,15 +258,14 @@ export class CreateBookingComponent implements OnInit {
   validateServiceHours(group: AbstractControl): ValidationErrors | null {
     const startTime = group.get('startTime')?.value;
     const endTime = group.get('endTime')?.value;
-  
+
     if (!startTime || !endTime) {
       return null;
     }
-  
+
     const start = new Date(`01/01/2000 ${startTime}`);
     const end = new Date(`01/01/2000 ${endTime}`);
-  
+
     return start >= end ? { invalidServiceHours: true } : null;
   }
-
 }
