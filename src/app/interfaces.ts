@@ -41,4 +41,11 @@ export interface Venue {
     startTime: string;
     endTime: string;
   }
+
+  export interface Availability {
+    id:        string;
+    venueId:   string;
+    date:      Date;
+    available: boolean;
+}
   

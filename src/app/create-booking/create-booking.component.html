@@ -5,7 +5,7 @@
     </div>
   </div>
 
-  <form class="mt-4">
+  <form class="mt-4" [formGroup]="reservaForm" (ngSubmit)="createOrder()">
     <!-- Datos de la Empresa -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white">
@@ -14,17 +14,35 @@
       <div class="card-body">
         <div class="mb-3">
           <label class="form-label required">Nombre de la Empresa</label>
-          <input type="text" class="form-control" placeholder="Ingrese el nombre de la empresa">
+          <input type="text" class="form-control" placeholder="Ingrese el nombre de la empresa"
+            formControlName="companyName" />
+          <div *ngIf="reservaForm.get('companyName')?.touched && reservaForm.get('companyName')?.errors?.['required']">
+            <small class="text-danger">El nombre de la empresa es requerido</small>
+          </div>
+          <div *ngIf="reservaForm.get('companyName')?.touched && reservaForm.get('companyName')?.errors?.['minlength']">
+            <small class="text-danger">El nombre debe tener al menos 5 caracteres</small>
+          </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label required">Email Corporativo</label>
-          <input type="email" class="form-control" placeholder="ejemplo@empresa.com">
+          <input type="email" class="form-control" placeholder="ejemplo@empresa.com" formControlName="companyEmail" />
+          <div
+            *ngIf="reservaForm.get('companyEmail')?.touched && reservaForm.get('companyEmail')?.errors?.['required']">
+            <small class="text-danger">El email corporativo es requerido</small>
+          </div>
+          <div *ngIf="reservaForm.get('companyEmail')?.touched && reservaForm.get('companyEmail')?.errors?.['email']">
+            <small class="text-danger">El email ingresado no es válido</small>
+          </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label required">Teléfono de Contacto</label>
-          <input type="tel" class="form-control" placeholder="+54 11 1234-5678">
+          <input type="tel" class="form-control" placeholder="+54 11 1234-5678" formControlName="contactPhone" />
+          <div
+            *ngIf="reservaForm.get('contactPhone')?.touched && reservaForm.get('contactPhone')?.errors?.['required']">
+            <small class="text-danger">El teléfono de contacto es requerido</small>
+          </div>
         </div>
       </div>
     </div>
@@ -37,35 +55,57 @@
       <div class="card-body">
         <div class="mb-3">
           <label class="form-label required">Lugar del Evento</label>
-          <select class="form-select">
+          <select class="form-select" formControlName="venueId">
             <option value="">Seleccione un lugar</option>
+            <option *ngFor="let venue of venues" [value]="venue.id">{{ venue.name }}</option>
           </select>
+          <div *ngIf="reservaForm.get('venueId')?.touched && reservaForm.get('venueId')?.errors?.['required']">
+            <small class="text-danger">El lugar del evento es requerido</small>
+          </div>
         </div>
 
         <div class="row">
           <div class="col-md-4">
             <div class="mb-3">
               <label class="form-label required">Fecha</label>
-              <input type="date" class="form-control">
+              <input type="date" class="form-control" formControlName="eventDate" />
+              <div *ngIf="reservaForm.get('eventDate')?.touched && reservaForm.get('eventDate')?.errors?.['required']">
+                <small class="text-danger">La fecha del evento es requerida</small>
+              </div>
+              <div *ngIf="reservaForm.get('eventDate')?.touched && reservaForm.get('eventDate')?.errors?.['unavailable']">
+                <small class="text-danger">La fecha del evento seleccionada se encuentra ya ocupada</small>
+              </div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="mb-3">
               <label class="form-label required">Hora de Inicio</label>
-              <input type="time" class="form-control">
+              <input type="time" class="form-control" formControlName="startTime" />
+              <div *ngIf="reservaForm.get('startTime')?.touched && reservaForm.get('startTime')?.errors?.['required']">
+                <small class="text-danger">La hora de inicio es requerida</small>
+              </div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="mb-3">
               <label class="form-label required">Hora de Finalización</label>
-              <input type="time" class="form-control">
+              <input type="time" class="form-control" formControlName="endTime" />
+              <div *ngIf="reservaForm.get('endTime')?.touched && reservaForm.get('endTime')?.errors?.['required']">
+                <small class="text-danger">La hora de finalización es requerida</small>
+              </div>
+              <div class="error-message" *ngIf="hasTimeError">
+                <small class="text-danger">La hora de fin debe ser mayor que la hora de inicio</small>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label required">Cantidad Total de Personas</label>
-          <input type="number" class="form-control">
+          <input type="number" class="form-control" formControlName="totalPeople" />
+          <div *ngIf="reservaForm.get('totalPeople')?.touched && reservaForm.get('totalPeople')?.errors?.['required']">
+            <small class="text-danger">La cantidad total de personas es requerida</small>
+          </div>
         </div>
       </div>
     </div>
@@ -74,50 +114,71 @@
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="h5 mb-0">Servicios Adicionales</h3>
-        <button type="button" class="btn btn-light btn-sm">
+        <button type="button" class="btn btn-light btn-sm" (click)="addService()">
           + Agregar Servicio
         </button>
       </div>
-      <div class="card-body">
-        <div class="border rounded p-3 mb-3 position-relative">
-          <button type="button" class="btn-close position-absolute top-0 end-0 m-2"></button>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label required">Tipo de Servicio</label>
-                <select class="form-select">
-                  <option value="">Seleccione un servicio</option>
-                </select>
-              </div>
-            </div>
 
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label required">Cantidad de Personas</label>
-                <input type="number" class="form-control">
-              </div>
-            </div>
-          </div>
+      <div formArrayName="services">
+        <div *ngFor="let serv of servicesFormArray.controls; let i = index">
+          <div [formGroupName]="i">
+            <div class="card-body">
+              <div class="border rounded p-3 mb-3 position-relative">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                  (click)="removeService(i)"></button>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label required">Tipo de Servicio</label>
+                      <select class="form-select" formControlName="serviceId">
+                        <option value="">Seleccione un servicio</option>
+                        <option *ngFor="let service of services" [value]="service.id">{{ service.name }}</option>
+                      </select>
+                      <div *ngIf="serv.get('serviceId')?.touched && serv.get('serviceId')?.errors?.['required']">
+                        <small class="text-danger">El tipo de servicio es requerido</small>
+                      </div>
+                    </div>
+                  </div>
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label required">Hora de Inicio</label>
-                <input type="time" class="form-control">
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label required">Hora de Finalización</label>
-                <input type="time" class="form-control">
-              </div>
-            </div>
-          </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label required">Cantidad de Personas</label>
+                      <input type="number" class="form-control" formControlName="quantity" />
+                      <div *ngIf="serv.get('quantity')?.touched && serv.get('quantity')?.errors?.['required']">
+                        <small class="text-danger">La cantidad de personas es requerida</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-          <div class="text-end">
-            <small class="text-muted">
-              Subtotal del servicio: $0.00
-            </small>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label required">Hora de Inicio</label>
+                      <input type="time" class="form-control" formControlName="startTime" />
+                      <div *ngIf="serv.get('startTime')?.touched && serv.get('startTime')?.errors?.['required']">
+                        <small class="text-danger">La hora de inicio es requerida</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label required">Hora de Finalización</label>
+                      <input type="time" class="form-control" formControlName="endTime" />
+                      <div *ngIf="serv.get('endTime')?.touched && serv.get('endTime')?.errors?.['required']">
+                        <small class="text-danger">La hora de finalización es requerida</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-end">
+                  <small class="text-muted">
+                    Subtotal del servicio: ${{servicesFormArray.controls[i].get('subTotal')?.value}}
+                  </small>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -134,7 +195,7 @@
             <h6>Subtotal:</h6>
           </div>
           <div class="col-auto">
-            <h6>$0.0</h6>
+            <h6>${{this.subtotal}}</h6>
           </div>
         </div>
 
@@ -144,18 +205,18 @@
             <small>¡Descuento aplicado por grupo mayor a 100 personas!</small>
           </div>
           <div class="col-auto">
-            <h6>-$0.0</h6>
+            <h6>-${{this.discount}}</h6>
           </div>
         </div>
 
-        <hr>
+        <hr />
 
         <div class="row">
           <div class="col">
             <h5 class="mb-0">Total Final:</h5>
           </div>
           <div class="col-auto">
-            <h5 class="mb-0">$0.0</h5>
+            <h5 class="mb-0">${{this.total}}</h5>
           </div>
         </div>
       </div>
@@ -163,10 +224,9 @@
 
     <!-- Botón Submit -->
     <div class="d-grid gap-2">
-      <button type="submit" class="btn btn-primary btn-lg">
+      <button type="submit" class="btn btn-primary btn-lg" [disabled]="!reservaForm.valid">
         Crear Reserva
       </button>
     </div>
   </form>
 </div>
-
